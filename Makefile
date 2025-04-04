@@ -11,11 +11,9 @@ EXCLUDES = "**/__pycache__/*"
 version:
 	echo "Plugin version: ${VERSION}"
 
-$(ZIPFILE): version
-
 all: $(ZIPFILE)
 
-$(ZIPFILE): $(TOP_LEVEL_DIR)/$(PLUGIN_ROOT)
+$(ZIPFILE): $(TOP_LEVEL_DIR)/$(PLUGIN_ROOT) version
 	(cd $(TOP_LEVEL_DIR) && zip -r $(CURRENT_PATH)/$(ZIPFILE) $(PLUGIN_ROOT) -x $(EXCLUDES) )
 
 clean:
