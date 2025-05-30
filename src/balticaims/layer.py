@@ -62,11 +62,12 @@ class DataCubeLayer(QgsRasterLayer):
             band_name = band_names[band_idx - 1]
             array = self.ds[band_name].values.astype(np.float32)
             self.logger.info(f"{band_idx=}, {band_name=}, {array.shape=}")
-            mem_ds.GetRasterBand(band_idx).WriteArray(array)
+            band_dsc = mem_ds.GetRasterBand(band_idx)
+            band_dsc.WriteArray(array)
+            band_dsc.SetDescription(band_name)
         del mem_ds
 
         return vsi_path
-
 
     def set_single_band_pseudo_color_table(self):
         self.check_loaded()

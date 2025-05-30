@@ -29,6 +29,8 @@ class GisDataCube:
             self.logger.info(f"Layer '{layer_id}' is already open, skipping")
 
         layer_ds = self.ds[layer_id].transpose("time", "lat", "lon").to_dataset(dim="time")
+        time_stamps = list(layer_ds.data_vars)
+        layer_ds = layer_ds.rename({t: f"{layer_id}_{t}" for t in time_stamps})
         layer = DataCubeLayer(layer_ds, name=layer_id)
         # TODO clean up
         raster_layer = layer
