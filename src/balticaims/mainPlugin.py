@@ -28,7 +28,8 @@ class XcubePlugin:
         """
         self.init_action(
             identifier="setup",
-            action_name="Setup (Debug)",
+            action_name="Add Datacube",
+            #action_name="Setup (Debug)",
             action_fn=self.action_debug,
             object_name="Setup (Debug, on)",
             whats_this="""
@@ -37,20 +38,21 @@ class XcubePlugin:
             shortcut="Ctrl+T",
         )
 
-        self.init_action(
-            identifier="query dataset",
-            action_name="Query (Debug)",
-            action_fn=self.action_query_dialog,
-            object_name="Query the currently selected data",
-            whats_this="""
-                Looks up the currently selected dataset from the dialog
-            """,
-            shortcut="Ctrl+U",
-        )
+        # self.init_action(
+        #     identifier="query dataset",
+        #     action_name="Query (Debug)",
+        #     action_fn=self.action_query_dialog,
+        #     object_name="Query the currently selected data",
+        #     whats_this="""
+        #         Looks up the currently selected dataset from the dialog
+        #     """,
+        #     shortcut="Ctrl+U",
+        # )
 
         self.init_action(
             identifier="Load layer",
-            action_name="Load layer (Debug)",
+            action_name="Load layer",
+            #action_name="Load layer (Debug)",
             action_fn=self.action_load_layer,
             object_name="Load a layer from a datacube",
             whats_this="""
