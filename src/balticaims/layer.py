@@ -70,7 +70,6 @@ class DataCubeLayer(QgsRasterLayer):
         return vsi_path
 
     def set_single_band_pseudo_color_table(self):
-        self.check_loaded()
         shader_fn = QgsColorRampShader()
         shader_fn.setColorRampType(Qgis.ShaderInterpolationMethod.Linear)
         shader = QgsRasterShader()
@@ -89,7 +88,6 @@ class DataCubeLayer(QgsRasterLayer):
         ``time_index`` has the same number of entries that the layer
         has time steps (bands).
         """
-        self.check_loaded()
         dp = self.dataProvider()
         if dp is None:
             self.logger.warning(f"No data provider found for layer {self.id()}")
@@ -99,6 +97,7 @@ class DataCubeLayer(QgsRasterLayer):
             self.logger.warning(f"No temporal properties found for layer {self.id()}")
             return False
 
+        # TODO this skips the last image, also time ranges overlap
         band_count = dp.bandCount()
         ranges: List[QgsDateTimeRange] = []
         if band_count != len(time_index):
@@ -115,7 +114,3 @@ class DataCubeLayer(QgsRasterLayer):
         self.triggerRepaint()
 
         return True
-
-    def check_loaded(self):
-        if not self.raster_layer:
-            raise RuntimeError("Data must be loaded before this operation")
