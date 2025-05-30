@@ -110,7 +110,7 @@ class DataCubeLayer(QgsRasterLayer):
             ranges.append(QgsDateTimeRange(start_time, end_time))
 
         temporal_properties.setMode(QgsRasterLayerTemporalProperties.TemporalMode.FixedRangePerBand)
-        temporal_properties.setFixedRangePerBand(ranges)
+        temporal_properties.setFixedRangePerBand({i+1: r for i,r in enumerate(ranges)})
         temporal_properties.setIsActive(True)
         self.triggerRepaint()
 

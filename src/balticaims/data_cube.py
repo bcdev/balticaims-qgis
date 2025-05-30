@@ -36,6 +36,8 @@ class GisDataCube:
         raster_layer = layer
         self.layers[layer_id] = layer
         self.logger.info(f"Opened layer '{layer_id}'")
+        layer.set_time_range_per_band(self.ds.time.to_pandas())
+        layer.set_single_band_pseudo_color_table()
 
         # TODO move to main Plugin
         if raster_layer.isValid():
