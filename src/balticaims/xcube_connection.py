@@ -1,9 +1,12 @@
-import functools
 from xcube.core.store import new_data_store
+import requests
+
+from balticaims.utils import get_logger
 
 
 # TODO make configurable for other usages
-ENDPOINT_URL = "https://xcube.balticaims.eu/api/s3"
+S3_ENDPOINT_URL = "https://xcube.balticaims.eu/api/s3"
+DATASETS_ENDPOINT_URL = "https://xcube.balticaims.eu/api/datasets"
 DATA_STORE_ROOT = "datasets" # TODO potentially use "pyramids" here
 
 
@@ -15,6 +18,7 @@ class XcubeConnection:
     """
     def __init__(self) -> None:
         self._store = None
+        self.logger = get_logger()
 
     def open_store(self):
         if not self._store:
@@ -24,7 +28,7 @@ class XcubeConnection:
                 storage_options={
                     "anon": True,
                     "client_kwargs": {
-                        "endpoint_url": ENDPOINT_URL,
+                        "endpoint_url": S3_ENDPOINT_URL,
                     }
                 }
             )
@@ -41,3 +45,10 @@ class XcubeConnection:
     def check_store(self):
         if not self._store:
             raise RuntimeError(f"No data store initialized")
+
+    def get_metadata(self, dataset_id):
+        dataset_id = dataset_id.removesuffix(".zarr")
+        self.logger.info(f"Requesting metadata for '{dataset_id}'")
+        response = requests.get(f"{DATASETS_ENDPOINT_URL}/{dataset_id}")
+        response.raise_for_status()
+        return response.json()

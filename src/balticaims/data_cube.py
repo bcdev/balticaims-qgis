@@ -6,9 +6,6 @@ from balticaims.utils import get_logger
 from balticaims.xcube_connection import XcubeConnection
 
 
-ENDPOINT_URL = "https://xcube.balticaims.eu/api/s3"
-DATA_STORE_ROOT = "datasets" # TODO potentially use "pyramids" here
-
 class GisDataCube:
     """
     """
@@ -22,6 +19,7 @@ class GisDataCube:
         self.variable_names = [k for k in self.ds.variables.keys() if k not in self.SKIP_KEYS]
         self.logger.info(f"Opened dataset with variables {self.variable_names}")
         self.layers = {}
+        self._metadata = connection.get_metadata(dataset_id)
 
     def open_layer(self, layer_id: str):
         self.logger.info(f"Opening layer '{layer_id}'")
@@ -36,8 +34,16 @@ class GisDataCube:
         raster_layer = layer
         self.layers[layer_id] = layer
         self.logger.info(f"Opened layer '{layer_id}'")
-        layer.set_time_range_per_band(self.ds.time.to_pandas())
-        layer.set_single_band_pseudo_color_table()
+        layer.set_time_range_per_band(self.ds.time.to_pandas().iloc[:max_time_steps])
+
+        # TODO add proper handling of dataset metadata
+        self.logger.info(f"ids: {[d.get('id') for d in self._metadata.get("variables", {})]}")
+        variable_metadata = next((d for d in self._metadata.get("variables", {}) if d.get("name") == layer_id), {})
+        self.logger.info(f"variable metadata: {variable_metadata}")
+        color_ramp_min = variable_metadata.get("colorBarMin", None)
+        color_ramp_max = variable_metadata.get("colorBarMax", None)
+        # TODO remove
+        layer.set_single_band_pseudo_color_table(color_ramp_min=color_ramp_min, color_ramp_max=color_ramp_max)
 
         # TODO move to main Plugin
         if raster_layer.isValid():

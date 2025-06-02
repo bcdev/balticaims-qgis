@@ -93,7 +93,14 @@ class DataCubeLayer(QgsRasterLayer):
         shader.setRasterShaderFunction(shader_fn)
 
         # TODO see which band should be set
-        self.setRenderer(QgsSingleBandPseudoColorRenderer(self.dataProvider(), 1, shader))
+        renderer = QgsSingleBandPseudoColorRenderer(self.dataProvider(), 1, shader=shader)
+        if color_ramp_min is not None:
+            renderer.setClassificationMin(color_ramp_min)
+            self.logger.info(f"Setting color ramp min to {color_ramp_min}")
+        if color_ramp_max is not None:
+            renderer.setClassificationMax(color_ramp_max)
+            self.logger.info(f"Setting color ramp max to {color_ramp_max}")
+        self.setRenderer(renderer)
         self.triggerRepaint()
 
     @staticmethod
