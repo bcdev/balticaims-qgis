@@ -43,7 +43,7 @@ class DataCubeLayer(QgsRasterLayer):
         vsi_path = f"/vsimem/{self.name}.tif"
         # TODO use actual data type and do not force to f32 
         driver = gdal.GetDriverByName("GTiff")
-        first_time_step = next(iter(ds.variables.keys()))
+        first_time_step = next(iter(ds.data_vars.keys()))
         height, width = self.ds[first_time_step].shape
         self.logger.info(f"{n_time_steps=}, {height=}, {width=}")
         mem_ds = driver.Create(f"/vsimem/{self.name}.tif", width, height, n_time_steps, gdal.GDT_Float32)
@@ -132,7 +132,7 @@ class DataCubeLayer(QgsRasterLayer):
         band_count = dp.bandCount()
         ranges: List[QgsDateTimeRange] = []
         if band_count != len(time_index):
-            self.logger.warning(f"Band count does not match time index shape for band '{self.id()}'")
+            self.logger.warning(f"Band count ({band_count}) does not match time index shape ({len(time_index)}) for band '{self.id()}'")
             return False
         for (start_idx, end_idx) in itertools.pairwise(range(band_count)):
             start_time = QDateTime.fromString(time_index.iloc[start_idx].isoformat(), Qt.ISODate)

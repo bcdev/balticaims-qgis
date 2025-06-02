@@ -16,7 +16,7 @@ class GisDataCube:
         self.dataset_id = dataset_id
         self.ds: xr.Dataset = connection.get_ds(dataset_id)
         self.logger = get_logger()
-        self.variable_names = [k for k in self.ds.variables.keys() if k not in self.SKIP_KEYS]
+        self.variable_names = [k for k in self.ds.data_vars.keys() if k not in self.SKIP_KEYS]
         self.logger.info(f"Opened dataset with variables {self.variable_names}")
         self.layers = {}
         self._metadata = connection.get_metadata(dataset_id)
