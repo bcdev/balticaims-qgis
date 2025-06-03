@@ -36,7 +36,8 @@ class XcubeConnection:
 
     def get_ds(self, dataset_id):
         self.check_store()
-        return self._store.open_data(dataset_id)
+        # TODO hardcoded zarr
+        return self._store.open_data(dataset_id + ".zarr")
 
     def list_datasets(self):
         self.check_store()
@@ -50,5 +51,11 @@ class XcubeConnection:
         dataset_id = dataset_id.removesuffix(".zarr")
         self.logger.info(f"Requesting metadata for '{dataset_id}'")
         response = requests.get(f"{DATASETS_ENDPOINT_URL}/{dataset_id}")
+        response.raise_for_status()
+        return response.json()
+
+    def get_dataset_names(self):
+        self.logger.info(f"Requesting dataset list")
+        response = requests.get(f"{DATASETS_ENDPOINT_URL}")
         response.raise_for_status()
         return response.json()

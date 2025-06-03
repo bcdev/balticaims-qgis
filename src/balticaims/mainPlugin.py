@@ -133,9 +133,9 @@ class XcubePlugin:
             QMessageBox.information(self, "No connection to xcube", "Cannot load a data cube without an active xcube connection. Please establish a connection first.")
             return
 
-        options = list(self.connection.list_datasets())
-
-        dialog = SelectDatasetDialog(dataset_ids=options)
+        options = self.connection.get_dataset_names()["datasets"]
+        options.sort(key=lambda x: x["title"])
+        dialog = SelectDatasetDialog(datasets=options)
         if not dialog.exec_():
             self.logger.info("dataset selection not accepted, skipping")
             return
@@ -146,11 +146,11 @@ class XcubePlugin:
         self.cubes[dataset_id] = cube
 
     def action_load_layer(self):
-        dialog = SelectLayerDialog(self.cubes)
+        dialog = SelectLayerDialog(list(self.cubes.values()))
         if not dialog.exec_():
             self.logger.info("Layer selection not accepted, skipping")
             return
-        cube_id = dialog.selected_cube
+        cube_id = dialog.selected_cube_id
         variable = dialog.selected_variable
         # TODO for test
         #self.cubes[dataset_id].open_layer(cube.variable_names[0])

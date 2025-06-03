@@ -16,10 +16,11 @@ class GisDataCube:
         self.dataset_id = dataset_id
         self.ds: xr.Dataset = connection.get_ds(dataset_id)
         self.logger = get_logger()
-        self.variable_names = [k for k in self.ds.data_vars.keys() if k not in self.SKIP_KEYS]
-        self.logger.info(f"Opened dataset with variables {self.variable_names}")
         self.layers = {}
-        self._metadata = connection.get_metadata(dataset_id)
+        self._metadata = DataCubeMetadata(connection.get_metadata(dataset_id))
+        self.name = self._metadata.name
+        self.variable_names = [v["name"] for v in self._metadata.variables.values()]
+        self.logger.info(f"Opened dataset with variables {self.variable_names}")
 
     def open_layer(self, layer_id: str):
         self.logger.info(f"Opening layer '{layer_id}'")
@@ -36,13 +37,11 @@ class GisDataCube:
         self.logger.info(f"Opened layer '{layer_id}'")
         layer.set_time_range_per_band(self.ds.time.to_pandas().iloc[:max_time_steps])
 
-        # TODO add proper handling of dataset metadata
-        self.logger.info(f"ids: {[d.get('id') for d in self._metadata.get("variables", {})]}")
-        variable_metadata = next((d for d in self._metadata.get("variables", {}) if d.get("name") == layer_id), {})
+        self.logger.info(f"ids: {[self._metadata.variables.keys()]}")
+        variable_metadata = self._metadata.variables.get(layer_id)
         self.logger.info(f"variable metadata: {variable_metadata}")
         color_ramp_min = variable_metadata.get("colorBarMin", None)
         color_ramp_max = variable_metadata.get("colorBarMax", None)
-        # TODO remove
         layer.set_single_band_pseudo_color_table(color_ramp_min=color_ramp_min, color_ramp_max=color_ramp_max)
 
         # TODO move to main Plugin
@@ -51,3 +50,20 @@ class GisDataCube:
         else:
             self.logger.warning(f"layer '{layer_id}' not valid")
             self.logger.warning(f"    cause: '{raster_layer.error().message()}'")
+
+
+class DataCubeMetadata:
+    def __init__(self, raw: dict) -> None:
+        self.raw = raw
+        self.id = raw["id"]
+        self.name = raw["title"]
+
+        self.variables = {
+            var["name"]: raw["variables"][i] for i, var in enumerate(raw["variables"])
+        }
+
+    def __getattr__(self, item):
+        if item in self.variables:
+            return self.variables[item]
+
+        raise AttributeError(f"{item} not in {self.variables}")
