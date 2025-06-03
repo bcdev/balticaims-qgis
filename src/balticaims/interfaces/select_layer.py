@@ -23,10 +23,7 @@ class SelectLayerDialog(QDialog):
         self.cubeComboBox.clear()
         self.layerComboBox.clear()
         self.cubeComboBox.addItems([c.name for c in self.cubes])
-        selected_cube = cubes[self.cubeComboBox.currentIndex()]
-        if selected_cube:
-            for d in selected_cube._metadata.variables.values():
-                self.layerComboBox.addItem(f"{d['name']} ({d['title']})", d["name"])
+        self.update_layers_based_on_cube()
 
         self.okayButton.clicked.connect(self.handle_button_click)
         self.cubeComboBox.currentTextChanged.connect(self.update_layers_based_on_cube)
@@ -37,7 +34,9 @@ class SelectLayerDialog(QDialog):
         self.accept()
 
     def update_layers_based_on_cube(self):
-        selected_cube = self.cubeComboBox.currentText()
+        selected_cube = self.cubes[self.cubeComboBox.currentIndex()]
         self.layerComboBox.clear()
-        self.logger.info(f"Variable names of cube '{selected_cube}'\n{self.cubes[selected_cube].variable_names}")
-        self.layerComboBox.addItems(self.cubes[selected_cube].variable_names)
+        if selected_cube:
+            self.logger.info(f"selected cube {selected_cube.dataset_id} with variables {selected_cube._metadata.variables.keys()}")
+            for d in selected_cube._metadata.variables.values():
+                self.layerComboBox.addItem(f"{d['name']} ({d['title']})", d["name"])

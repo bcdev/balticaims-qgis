@@ -121,15 +121,15 @@ class XcubePlugin:
         """
         self.connection = XcubeConnection()
         self.connection.open_store()
-        self.logger.info("Xcube: Opened connection to xcube server")
+        self.logger.info("Xcube: Opened connection to xcube data store")
 
     def action_load_data_cube(self):
         """
         Select a data cube from an existing server connection.
         """
-        options = None
         if not self.connection:
             self.logger.info(f"Trying to load data cube without connection, skipping.")
+            # TODO change message to be more accurate
             QMessageBox.information(self, "No connection to xcube", "Cannot load a data cube without an active xcube connection. Please establish a connection first.")
             return
 

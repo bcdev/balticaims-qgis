@@ -29,8 +29,9 @@ class GisDataCube:
 
         layer_ds = self.ds[layer_id].transpose("time", "lat", "lon").to_dataset(dim="time")
         time_stamps = list(layer_ds.data_vars)
-        layer_ds = layer_ds.rename({t: f"{layer_id}_{t}" for t in time_stamps})
-        layer = DataCubeLayer(layer_ds, name=layer_id)
+        layer_ds = layer_ds.rename({t: f"{t}: ({layer_id})" for t in time_stamps})
+        display_name = f"{self._metadata.variables[layer_id]['name']} ({self._metadata.name})"
+        layer = DataCubeLayer(layer_ds, name=layer_id, display_name=display_name, max_time_steps=max_time_steps)
         # TODO clean up
         raster_layer = layer
         self.layers[layer_id] = layer
@@ -39,7 +40,6 @@ class GisDataCube:
 
         self.logger.info(f"ids: {[self._metadata.variables.keys()]}")
         variable_metadata = self._metadata.variables.get(layer_id)
-        self.logger.info(f"variable metadata: {variable_metadata}")
         color_ramp_min = variable_metadata.get("colorBarMin", None)
         color_ramp_max = variable_metadata.get("colorBarMax", None)
         layer.set_single_band_pseudo_color_table(color_ramp_min=color_ramp_min, color_ramp_max=color_ramp_max)

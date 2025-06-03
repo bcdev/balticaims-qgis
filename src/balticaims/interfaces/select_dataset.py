@@ -23,8 +23,6 @@ class SelectDatasetDialog(QDialog):
             return
 
         self.datasetComboBox.clear()
-        self.logger.info(f"{type(datasets)=}")
-        self.logger.info(f"{datasets=}")
         self.datasetComboBox.addItems([d["title"] for d in datasets])
         self.okayButton.clicked.connect(self.handle_button_click)
 
