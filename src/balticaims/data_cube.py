@@ -22,7 +22,7 @@ class GisDataCube:
         self.variable_names = [v["name"] for v in self._metadata.variables.values()]
         self.logger.info(f"Opened dataset with variables {self.variable_names}")
 
-    def open_layer(self, layer_id: str):
+    def open_layer(self, layer_id: str, max_time_steps: int | None = None):
         self.logger.info(f"Opening layer '{layer_id}'")
         if layer_id in self.layers:
             self.logger.info(f"Layer '{layer_id}' is already open, skipping")

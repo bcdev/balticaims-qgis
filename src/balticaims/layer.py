@@ -32,16 +32,17 @@ class DataCubeLayer(QgsRasterLayer):
         self.ds = ds
         self.logger = get_logger()
         self.var_name = name
-        self.vsi_path = self.read_data(ds)#, max_time_steps)
+        self.vsi_path = self.read_data(ds, max_time_steps)
 
         display_name = display_name or name
         super().__init__(self.vsi_path, display_name, "gdal")
 
 
-    # TODO name
-    def read_data(self, ds):
+    def read_data(self, ds, max_time_steps=None):
         self.logger.info(f"Read data: variables are {self.ds.variables.keys()}")
         n_time_steps = len(ds.variables) - len(ds.coords)
+        if max_time_steps is not None:
+            n_time_steps = min(max_time_steps, n_time_steps)
         vsi_path = f"/vsimem/{self.name}.tif"
         # TODO use actual data type and do not force to f32 
         driver = gdal.GetDriverByName("GTiff")

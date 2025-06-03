@@ -153,8 +153,7 @@ class XcubePlugin:
         cube_id = dialog.selected_cube_id
         variable = dialog.selected_variable
         # TODO for test
-        #self.cubes[dataset_id].open_layer(cube.variable_names[0])
-        self.cubes[cube_id].open_layer(variable)
+        self.cubes[cube_id].open_layer(variable, max_time_steps=None)
 
     def action_query_dialog(self):
         """
