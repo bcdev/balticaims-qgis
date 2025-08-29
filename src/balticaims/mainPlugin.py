@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Callable 
+from typing import Callable
 
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 
@@ -9,6 +8,7 @@ from balticaims.utils import get_logger
 
 from balticaims.interfaces.select_dataset import SelectDatasetDialog
 from balticaims.interfaces.select_layer import SelectLayerDialog
+from balticaims.interfaces.select_layer_with_date import SelectLayerAndTimeDialog
 
 
 DEFAULT_MENU="&BalticAIMS"
@@ -50,10 +50,22 @@ class XcubePlugin:
         # )
 
         self.init_action(
+            identifier="Load layer (legacy)",
+            action_name="Load layer (legacy)",
+            #action_name="Load layer (Debug)",
+            action_fn=self.action_load_layer,
+            object_name="Load a layer from a datacube",
+            whats_this="""
+                Loads the data for a single data cube variable and displays as a raster layer
+            """,
+            #shortcut="Ctrl+U",
+        )
+
+        self.init_action(
             identifier="Load layer",
             action_name="Load layer",
             #action_name="Load layer (Debug)",
-            action_fn=self.action_load_layer,
+            action_fn=self.action_load_layer_with_time_range,
             object_name="Load a layer from a datacube",
             whats_this="""
                 Loads the data for a single data cube variable and displays as a raster layer
@@ -94,14 +106,13 @@ class XcubePlugin:
             self.iface.removePluginMenu(DEFAULT_MENU, action)
             self.iface.removeToolBarIcon(action)
         #self.iface.mapCanvas().renderComplete.disconnect(self.renderTest)
+
     def renderTest(self, painter):
         pass
 
     def on_zoom_changed(self):
         """
-        Handles the loading of the correct pyramid level for the current area.
         """
-        # TODO might need to be called also on other events, e.g. panning
         pass
 
         #################################################################
@@ -153,7 +164,17 @@ class XcubePlugin:
         cube_id = dialog.selected_cube_id
         variable = dialog.selected_variable
         # TODO for test
-        self.cubes[cube_id].open_layer(variable, max_time_steps=None)
+        self.cubes[cube_id].open_layer(variable, max_time_steps=10)
+
+    def action_load_layer_with_time_range(self):
+        dialog = SelectLayerAndTimeDialog(list(self.cubes.values()))
+        if not dialog.exec_():
+            self.logger.info("Layer selection not accepted, skipping")
+            return
+        cube_id = dialog.selected_cube_id
+        variable = dialog.selected_variable
+        # TODO for test
+        self.cubes[cube_id].open_layer(variable, time_range=(dialog.selected_start_time, dialog.selected_end_time))
 
     def action_query_dialog(self):
         """
