@@ -32,3 +32,4 @@ Please make sure to not select the release archive (which you can download from 
 
 - If the plugin is installed, you may encounter an error when launching QGIS normally, without running `run_qgis_with_xcube.bat`. You can ignore this error, but the plugin will not work.
 - You can verify that the Python environment is configured correctly, by opening the [Python Console](https://docs.qgis.org/3.40/en/docs/user_manual/plugins/python_console.html) in QGIS and running `import xcube`. If no error is thrown, the environment is working correctly.
+- The scripts `setup.bat` and `run_qgis_with_xcube.bat` must remain next to the other files distributed with the release and created by running `setup.bat`. Do not move the scripts to another location, or they will stop working. You can create a Desktop shortcut, if you wish.
