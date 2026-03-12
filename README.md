@@ -1,6 +1,6 @@
 # BalticAIMS QGIS plugin
 
-A plugin for [QGIS](https://qgis.org/) to load [Xcube](https://github.com/xcube-dev/xcube) datasets from an xcube server.
+A plugin for [QGIS](https://qgis.org/) to load [Xcube](https://github.com/xcube-dev/xcube) data cubes from an xcube server.
 The plugin is being developed for ESA's [BalticAIMS](https://eo4society.esa.int/projects/balticaims/) project.
 
 # Installation

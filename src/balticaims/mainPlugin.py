@@ -6,7 +6,7 @@ from balticaims.data_cube import GisDataCube
 from balticaims.xcube_connection import XcubeConnection
 from balticaims.utils import get_logger
 
-from balticaims.interfaces.select_dataset import SelectDatasetDialog
+from balticaims.interfaces.select_dataset import SelectDataCubeDialog
 from balticaims.interfaces.select_layer import SelectLayerDialog
 from balticaims.interfaces.select_layer_with_date import SelectLayerAndTimeDialog
 
@@ -28,12 +28,13 @@ class XcubePlugin:
         """
         self.init_action(
             identifier="setup",
-            action_name="Add Datacube",
+            action_name="Add Data Cube",
             #action_name="Setup (Debug)",
             action_fn=self.action_debug,
             object_name="Setup (Debug, on)",
             whats_this="""
-                Run complete plugin setup for debugging
+                List available data cubes and collect metadata of a single cube.
+                The layers from the added cube are then avaiable to Load layer
             """,
             shortcut="Ctrl+T",
         )
@@ -48,18 +49,6 @@ class XcubePlugin:
         #     """,
         #     shortcut="Ctrl+U",
         # )
-
-        self.init_action(
-            identifier="Load layer (legacy)",
-            action_name="Load layer (legacy)",
-            #action_name="Load layer (Debug)",
-            action_fn=self.action_load_layer,
-            object_name="Load a layer from a datacube",
-            whats_this="""
-                Loads the data for a single data cube variable and displays as a raster layer
-            """,
-            #shortcut="Ctrl+U",
-        )
 
         self.init_action(
             identifier="Load layer",
@@ -146,12 +135,12 @@ class XcubePlugin:
 
         options = self.connection.get_dataset_names()["datasets"]
         options.sort(key=lambda x: x["title"])
-        dialog = SelectDatasetDialog(datasets=options)
+        dialog = SelectDataCubeDialog(data_cubes=options)
         if not dialog.exec_():
-            self.logger.info("dataset selection not accepted, skipping")
+            self.logger.info("data cube selection not accepted, skipping")
             return
-        dataset_id = dialog.selected_dataset
-        self.logger.info(f"Dataset selected: {dataset_id}")
+        dataset_id = dialog.selected_data_cube
+        self.logger.info(f"Data cube selected: {dataset_id}")
 
         cube = GisDataCube(dataset_id, self.connection)
         self.cubes[dataset_id] = cube
@@ -183,7 +172,7 @@ class XcubePlugin:
         if not self.dialog:
             self.logger.warning("No dialog present")
             return
-        ds_name = self.dialog.datasetComboBox.currentText()
+        ds_name = self.dialog.dataCubeComboBox.currentText()
         self.logger.info(f"DS name: '{ds_name}'")
 
         #################################################################
