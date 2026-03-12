@@ -27,6 +27,8 @@ class GisDataCube:
 
     def open_layer(self, layer_id: str, time_range:Tuple[datetime, datetime]|None=None):
         self.logger.info(f"Opening layer '{layer_id}'")
+        variable_metadata = self._metadata.variables.get(layer_id)
+        unit = variable_metadata.get("units", None)
 
         # TODO makes it impossible to change the time selection
         if layer_id in self.layers:
@@ -35,18 +37,17 @@ class GisDataCube:
         time_subset = self.time_subset(time_range[0], time_range[1], layer_id)
         layer_ds = time_subset.transpose("time", "lat", "lon").to_dataset(dim="time")
         time_stamps = list(layer_ds.data_vars)
-        layer_ds = layer_ds.rename({t: f"{t}: ({layer_id})" for t in time_stamps})
-        display_name = f"{self._metadata.variables[layer_id]['name']} ({self._metadata.name})"
+        layer_ds = layer_ds.rename({t: f"{t}: ({layer_id}) [{unit}]" for t in time_stamps})
+        display_name = f"{self._metadata.variables[layer_id]['name']} ({self._metadata.name}) [{unit}]"
         layer = DataCubeLayer(layer_ds, name=layer_id, display_name=display_name)
         self.layers[layer_id] = layer
         self.logger.info(f"Opened layer '{layer_id}'")
         layer.set_time_range_per_band(time_subset.time.to_pandas())
 
         self.logger.info(f"ids: {[self._metadata.variables.keys()]}")
-        variable_metadata = self._metadata.variables.get(layer_id)
         color_ramp_min = variable_metadata.get("colorBarMin", None)
         color_ramp_max = variable_metadata.get("colorBarMax", None)
-        layer.set_single_band_pseudo_color_table(color_ramp_min=color_ramp_min, color_ramp_max=color_ramp_max)
+        layer.set_single_band_pseudo_color_table(color_ramp_min=color_ramp_min, color_ramp_max=color_ramp_max, unit=unit)
 
         # TODO move to main Plugin
         if layer.isValid():
@@ -69,8 +70,9 @@ class DataCubeMetadata:
             var["name"]: raw["variables"][i] for i, var in enumerate(raw["variables"])
         }
         self.dimensions = {
-            dim["name"]: dim for i, dim in enumerate(raw["dimensions"])
+            dim["name"]: dim for dim in raw["dimensions"]
         }
+
 
     def __getattr__(self, item):
         if item in self.variables:

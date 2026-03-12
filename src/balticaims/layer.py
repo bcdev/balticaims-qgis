@@ -1,5 +1,5 @@
 import itertools
-from typing import List
+from typing import List, Optional
 
 from qgis.core import Qgis, QgsDateTimeRange, QgsRasterLayer, QgsColorRampShader, QgsRasterLayerTemporalProperties, QgsRasterShader, QgsSingleBandPseudoColorRenderer
 from qgis.PyQt.QtCore import QDateTime, Qt
@@ -43,7 +43,7 @@ class DataCubeLayer(QgsRasterLayer):
         n_time_steps = len(ds.variables) - len(ds.coords)
         self.logger.info(f"Opening layer {self.var_name} with {n_time_steps} time steps")
         vsi_path = f"/vsimem/{self.name}.tif"
-        # TODO use actual data type and do not force to f32 
+        # TODO use actual data type and do not force to f32. Returned from dataset api -> variable -> dtype
         driver = gdal.GetDriverByName("GTiff")
         first_time_step = next(iter(ds.data_vars.keys()))
         height, width = self.ds[first_time_step].shape
@@ -56,7 +56,7 @@ class DataCubeLayer(QgsRasterLayer):
         origin_x = self.ds.lon[0].item() - (xres / 2)
         origin_y = self.ds.lat[0].item() - (yres / 2)
 
-        # TODO Set to ACTUAL epsg
+        # TODO Set to ACTUAL epsg (spatialRef attribute from dataset api)
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(4326)
         mem_ds.SetProjection(srs.ExportToWkt())
@@ -81,7 +81,8 @@ class DataCubeLayer(QgsRasterLayer):
     def set_single_band_pseudo_color_table(self,
             color_ramp_data: List[QgsColorRampShader.ColorRampItem] | None=None,
             color_ramp_min: float | None=None,
-            color_ramp_max: float | None=None
+            color_ramp_max: float | None=None,
+            unit: Optional[str] = None,
             ):
         self.logger.info(f"Setting up single band pseudo color renderer for layer {self.var_name}")
         if color_ramp_data is None:
@@ -91,6 +92,10 @@ class DataCubeLayer(QgsRasterLayer):
 
         shader_fn.setColorRampType(Qgis.ShaderInterpolationMethod.Linear)
         shader_fn.setColorRampItemList(color_ramp_item_list)
+        legend_settings = shader_fn.legendSettings()
+        if legend_settings:
+            legend_settings.setSuffix(f" {unit}")
+
         shader = QgsRasterShader(color_ramp_min or self.DEFAULT_COLOR_RAMP_MIN, color_ramp_max or self.DEFAULT_COLOR_RAMP_MAX)
         shader.setRasterShaderFunction(shader_fn)
 
@@ -101,6 +106,8 @@ class DataCubeLayer(QgsRasterLayer):
         if color_ramp_max is not None:
             renderer.setClassificationMax(color_ramp_max)
             self.logger.info(f"Setting color ramp max to {color_ramp_max}")
+
+
         self.setRenderer(renderer)
         self.triggerRepaint()
 
