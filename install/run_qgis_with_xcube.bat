@@ -1,4 +1,4 @@
-REM @echo off
+@echo off
 set "ENV_PATH=%~dp0env"
 echo Running QGIS with Conda environment %ENV_PATH%
 echo. 
