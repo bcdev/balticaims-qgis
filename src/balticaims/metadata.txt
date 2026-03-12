@@ -1,7 +1,7 @@
 [general]
 name=balticaims
 description=Xcube plugin prototype for the BalticAIMS project
-version=0.0.1
+version=0.0.2
 qgisMinimumVersion=3.0
 author=Hannes Neuschmidt
 email=hannes.neuschmidt@brockmann-consult.de
