@@ -165,5 +165,5 @@ range back by one unit and set the step matching your data cube, e.g. to *months
 - Data cube layers will not reopen if a project is closed and reopened. For now, it is necessary to manually open
   these layers again.
 
-> [!INFORMATION]
+> [!IMPORTANT]
 > These limitations may be well addressed by native Zarr support coming to QGIS in the near future.
