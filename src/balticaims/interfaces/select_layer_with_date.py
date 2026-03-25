@@ -74,7 +74,8 @@ class SelectLayerAndTimeDialog(QDialog):
         self._var_time_slice=var_time_slice
         self.logger.info(f"{var_time_slice.nbytes=}, {var_time_slice.shape=}, {var_time_slice.dtype=}")
         human_readable_size = human_readable_download_size(var_time_slice.nbytes)
-        self.downloadSizeLabel.setText(f"Download size: {human_readable_size}")
+        label_text = f"Approx. Download size: {human_readable_size}.\nMake sure the cube slice fits into RAM."
+        self.downloadSizeLabel.setText(label_text)
         self.timeStepsLabel.setText(f"Number of time steps: {len(var_time_slice.time)}")
 
 
@@ -93,7 +94,7 @@ def human_readable_download_size(nbytes: int, base=1024):
     units = [
         ("bytes", 0),
         ("kiB", 0),
-        ("MiB", 2),
+        ("MiB", 0),
         ("GiB", 2),
         ("TiB", 2),
         ("PiB", 2),

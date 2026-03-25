@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>564</width>
-    <height>388</height>
+    <width>600</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -137,11 +137,12 @@
      <x>320</x>
      <y>260</y>
      <width>241</width>
-     <height>17</height>
+     <height>32</height>
     </rect>
    </property>
    <property name="text">
-    <string>Download size</string>
+    <string>Approx. Download size.
+    Please make sure the selected cube slice fits into RAM.</string>
    </property>
   </widget>
   <widget class="QLabel" name="timeStepsLabel">
