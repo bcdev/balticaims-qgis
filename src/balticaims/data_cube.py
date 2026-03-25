@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Tuple
+from typing import Tuple, Optional
 
 from qgis.core import QgsProject
+from qgis.PyQt.QtWidgets import QProgressBar
 import xarray as xr
 
 from balticaims.layer import DataCubeLayer
@@ -25,7 +26,7 @@ class GisDataCube:
         self.variable_names = [v["name"] for v in self._metadata.variables.values()]
         self.logger.info(f"Opened dataset with variables {self.variable_names}")
 
-    def open_layer(self, layer_id: str, time_range:Tuple[datetime, datetime]|None=None):
+    def open_layer(self, layer_id: str, time_range:Tuple[datetime, datetime]|None=None, progress_bar: Optional[QProgressBar]=None):
         self.logger.info(f"Opening layer '{layer_id}'")
         variable_metadata = self._metadata.variables.get(layer_id)
         unit = variable_metadata.get("units", None)
@@ -39,7 +40,8 @@ class GisDataCube:
         time_stamps = list(layer_ds.data_vars)
         layer_ds = layer_ds.rename({t: f"{t}: ({layer_id}) [{unit}]" for t in time_stamps})
         display_name = f"{self._metadata.variables[layer_id]['name']} ({self._metadata.name}) [{unit}]"
-        layer = DataCubeLayer(layer_ds, name=layer_id, display_name=display_name)
+
+        layer = DataCubeLayer(layer_ds, name=layer_id, display_name=display_name, progress_bar=progress_bar)
         self.layers[layer_id] = layer
         self.logger.info(f"Opened layer '{layer_id}'")
         layer.set_time_range_per_band(time_subset.time.to_pandas())

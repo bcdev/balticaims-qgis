@@ -1,6 +1,9 @@
+import time
 from typing import Callable
 
-from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressBar
+from qgis.core import Qgis
+from qgis.PyQt.QtCore import Qt
 
 from balticaims.data_cube import GisDataCube
 from balticaims.xcube_connection import XcubeConnection
@@ -12,6 +15,7 @@ from balticaims.interfaces.select_layer_with_date import SelectLayerAndTimeDialo
 
 
 DEFAULT_MENU="&BalticAIMS"
+PLUGIN_NAME="BalticAIMS"
 
 
 class XcubePlugin:
@@ -162,8 +166,29 @@ class XcubePlugin:
             return
         cube_id = dialog.selected_cube_id
         variable = dialog.selected_variable
-        # TODO for test
-        self.cubes[cube_id].open_layer(variable, time_range=(dialog.selected_start_time, dialog.selected_end_time))
+        n_time_steps = dialog.selected_n_time_steps
+
+        message_bar = self.iface.messageBar()
+
+        # TODO this strange workaround (pushing with level Qgis.Warning first) is needed to render the progress
+        #  message correctly (2026-03-25, HN)
+        message_bar.pushMessage(PLUGIN_NAME, f"Loading layer '{variable}', please wait...", Qgis.Warning)
+
+        if n_time_steps:
+            message = message_bar.createMessage(PLUGIN_NAME, f"Loading layer '{variable}', please wait...")
+            progress_bar = QProgressBar()
+            progress_bar.setMaximum(n_time_steps)
+            progress_bar.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+            message.layout().addWidget(progress_bar)
+            self.iface.messageBar().pushWidget(message, Qgis.Info)
+        else:
+            progress_bar = None
+
+        self.cubes[cube_id].open_layer(variable, time_range=(dialog.selected_start_time, dialog.selected_end_time), progress_bar=progress_bar)
+
+        self.iface.statusBarIface().clearMessage()
+        self.iface.messageBar().clearWidgets()
+        message_bar.pushSuccess(PLUGIN_NAME, f"Loaded layer '{variable}'")
 
     def action_query_dialog(self):
         """

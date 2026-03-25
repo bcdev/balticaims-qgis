@@ -21,6 +21,8 @@ class SelectLayerAndTimeDialog(QDialog):
         self.selected_variable = None
         self.selected_start_time = None
         self.selected_end_time = None
+        self._var_time_slice = None
+        self.selected_n_time_steps = None
 
         self.logger = get_logger()
         self.logger.info(f"available cubes: {[c.dataset_id for c in cubes]}")
@@ -41,6 +43,7 @@ class SelectLayerAndTimeDialog(QDialog):
         self.selected_variable = self.layerComboBox.currentData()
         self.selected_start_time = qdatetime_to_datetime(self.startDateTimeEdit.dateTime())
         self.selected_end_time = qdatetime_to_datetime(self.endDateTimeEdit.dateTime())
+        self.selected_n_time_steps = len(self._var_time_slice.time)
         self.accept()
 
     def update_layers_based_on_cube(self):
@@ -68,6 +71,7 @@ class SelectLayerAndTimeDialog(QDialog):
         start_date_time = qdatetime_to_datetime(self.startDateTimeEdit.dateTime())
         end_date_time = qdatetime_to_datetime(self.endDateTimeEdit.dateTime())
         var_time_slice = selected_cube.ds[selected_var].sel(time=slice(start_date_time, end_date_time))
+        self._var_time_slice=var_time_slice
         self.logger.info(f"{var_time_slice.nbytes=}, {var_time_slice.shape=}, {var_time_slice.dtype=}")
         human_readable_size = human_readable_download_size(var_time_slice.nbytes)
         self.downloadSizeLabel.setText(f"Download size: {human_readable_size}")
