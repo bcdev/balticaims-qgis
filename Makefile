@@ -7,6 +7,7 @@ VERSION = $(shell grep "version" ${METADATA} | cut -d = -f 2)
 ZIPFILE := ${PLUGIN_ROOT}.${VERSION}.zip
 CURRENT_PATH = $(realpath .)
 EXCLUDES = "**/__pycache__/*"
+README := README.md
 
 version:
 	echo "Plugin version: ${VERSION}"
@@ -21,3 +22,11 @@ clean:
 
 sync: $(ZIPFILE)
 	rsync $< qgis:/var/www/qgis/plugins/${PLUGIN_ROOT}/version/${VERSION}/$<
+
+release: $(ZIPFILE)
+	rm -r release
+	mkdir release
+	cp install/* release/
+	cp ${ZIPFILE} release/
+	cp ${README} release/
+	cd release && zip balticaims_qgis_release_${VERSION}.zip *
