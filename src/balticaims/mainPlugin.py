@@ -160,6 +160,12 @@ class XcubePlugin:
         self.cubes[cube_id].open_layer(variable, max_time_steps=10)
 
     def action_load_layer_with_time_range(self):
+        if not self.cubes:
+            self.logger.warning("Layer selection with no active cubes")
+            message_bar = self.iface.messageBar()
+            msg = f"No cubes loaded, select at least one cube with 'Add Data Cube' before loading a layer."
+            message_bar.pushWarning(PLUGIN_NAME, msg)
+            return
         dialog = SelectLayerAndTimeDialog(list(self.cubes.values()))
         if not dialog.exec_():
             self.logger.info("Layer selection not accepted, skipping")
